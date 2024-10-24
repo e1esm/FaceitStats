@@ -8,15 +8,18 @@ import org.apache.http.client.methods.HttpGet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 @Service
 public class StatisticsService {
 
     private static final int PAGE_SIZE = 20;
-    private static final String GET_STATS_OF_ID = "https://www.faceit.com/api/stats/v1/stats/time/users/%s/games/cs2?size=%d&game_mode=5v5";
+    private static final String GET_STATS_OF_ID = "https://www.faceit.com/api/stats/v1/stats/time/users/%s/games/cs2?size=%s&game_mode=5v5";
     private IHttpRequestBuilder httpClient;
 
     private ObjectMapper objectMapper;
@@ -37,16 +40,23 @@ public class StatisticsService {
         boolean toBeProcessed = true;
         String additionalPathVars = "";
 
-        while(toBeProcessed){
-            List<StatisticFaceitResponse> stats = this.performRequest(ID, additionalPathVars);
-            responses.addAll(stats);
+        try {
+            while (toBeProcessed) {
 
-            if(!areAllMatchesRequired || (stats.size() < StatisticsService.PAGE_SIZE)){
-                toBeProcessed = false;
-                continue;
+                List<StatisticFaceitResponse> stats = this.performRequest(ID, additionalPathVars);
+                responses.addAll(stats);
+
+                if (!areAllMatchesRequired || (stats.size() < StatisticsService.PAGE_SIZE)) {
+                    toBeProcessed = false;
+                    continue;
+                }
+                additionalPathVars = "&to=" + stats.get(stats.size() - 1).getDate().toString();
+
+                System.out.println(additionalPathVars);
+                Thread.sleep(50000);
             }
-
-            additionalPathVars = String.format("&to=%d", stats.getLast().getDate());
+        }catch (Exception e){
+            throw new RuntimeException(String.format("failed to get statistics of user: %d: %s", ID, e.getMessage()));
         }
 
         return responses;
@@ -54,9 +64,9 @@ public class StatisticsService {
 
     public List<StatisticFaceitResponse> performRequest(String id, String additionalPathVars){
         URI url = this.httpClient.buildRequestURI(
-                StatisticsService.GET_STATS_OF_ID + additionalPathVars,
-                id,
-                Integer.toString(StatisticsService.PAGE_SIZE));
+                    StatisticsService.GET_STATS_OF_ID + additionalPathVars,
+                    id,
+                    Integer.toString(StatisticsService.PAGE_SIZE));
 
         HttpGet req = new HttpGet(url);
         String content = this.httpClient.getJsonResponse(req);
