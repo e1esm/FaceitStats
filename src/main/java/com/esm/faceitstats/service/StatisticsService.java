@@ -53,11 +53,15 @@ public class StatisticsService {
     }
 
     public List<StatisticFaceitResponse> performRequest(String id, String additionalPathVars){
-        URI url = this.httpClient.buildRequestURI(StatisticsService.GET_STATS_OF_ID, id, Integer.toString(StatisticsService.PAGE_SIZE));
-        HttpGet req = new HttpGet(url);
+        URI url = this.httpClient.buildRequestURI(
+                StatisticsService.GET_STATS_OF_ID + additionalPathVars,
+                id,
+                Integer.toString(StatisticsService.PAGE_SIZE));
 
+        HttpGet req = new HttpGet(url);
         String content = this.httpClient.getJsonResponse(req);
         StatisticFaceitResponse[] response;
+
         try {
             response = this.objectMapper.readValue(content, StatisticFaceitResponse[].class);
         }catch (JsonProcessingException e){
