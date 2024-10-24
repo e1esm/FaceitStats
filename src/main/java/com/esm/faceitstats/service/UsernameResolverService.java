@@ -29,27 +29,16 @@ public class UsernameResolverService {
     }
 
     public UserFaceitResponse getIdByNickname(String nickname) {
-        URI uri = URI.create(
-                String.format(UsernameResolverService.GET_ID_BY_NICKNAME_ENDPOINT,
-                        nickname));
-        HttpGet httpGet = new HttpGet(uri);
-
-
-        CloseableHttpResponse resp;
-        String response;
+        HttpGet req;
         try {
-            resp = this.httpClient.execute(httpGet);
-        }catch (IOException e){
-            throw new RuntimeException(e);
+            req = new HttpGet(buildRequestURI(nickname));
+        }catch (IllegalArgumentException e){
+            throw new IllegalArgumentException(String.format("failed to create HTTP request: %s", e.getMessage()));
         }
 
-        try {
-          response = InputStreamConverter.convertStreamToString(resp.getEntity().getContent());
-        }catch (IOException e){
-            throw new RuntimeException(e);
-        }
+        String response = getJsonResponse(req);
+        UserFaceitResponse payload;
 
-        UserFaceitResponse payload = null;
         try {
             payload = this.objectMapper.readValue(response, UserFaceitResponse.class);
         }catch(JsonProcessingException e){
@@ -57,6 +46,30 @@ public class UsernameResolverService {
         }
 
         return payload;
+    }
+
+    private URI buildRequestURI(String param){
+        return URI.create(
+                String.format(UsernameResolverService.GET_ID_BY_NICKNAME_ENDPOINT,
+                        param));
+    }
+
+    private String getJsonResponse(HttpGet req){
+        CloseableHttpResponse resp;
+        String response;
+        try {
+            resp = this.httpClient.execute(req);
+        }catch (IOException e){
+            throw new RuntimeException(String.format("failed to execute request: %s", e.getMessage()));
+        }
+
+        try {
+            response = InputStreamConverter.convertStreamToString(resp.getEntity().getContent());
+        }catch (IOException e){
+            throw new RuntimeException(String.format("failed to convert response to string: %s", e.getMessage()));
+        }
+
+        return response;
     }
 
 }

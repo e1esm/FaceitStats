@@ -9,9 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.net.http.HttpClient;
-import java.util.concurrent.TimeUnit;
-
 @Configuration
 public class HttpClientConfig {
     private static final Logger log = LoggerFactory.getLogger(HttpClientConfig.class);
