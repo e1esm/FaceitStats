@@ -1,21 +1,22 @@
 package com.esm.faceitstats.utils;
 
-import com.esm.faceitstats.dto.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 
 @Component
 public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
-
     CloseableHttpClient client;
 
     @Autowired
@@ -28,7 +29,7 @@ public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
                 String.format(URL, param));
     }
 
-    public HttpResponse getHttpResponse(HttpRequestBase req){
+    public String getHttpResponse(HttpRequestBase req){
         req.addHeader(new BasicHeader("Authorization", String.format("Bearer %s", System.getenv("auth_token"))));
 
         CloseableHttpResponse resp;
@@ -39,8 +40,14 @@ public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
             throw new RuntimeException(String.format("failed to execute request: %s", e.getMessage()));
         }
 
+
         if(resp.getStatusLine().getStatusCode() != HttpStatus.OK.value()){
-            return new HttpResponse(null, resp.getStatusLine().getStatusCode());
+            throw HttpClientErrorException.create(
+                    HttpStatusCode.valueOf(resp.getStatusLine().getStatusCode()),
+                    "",
+                    null,
+                    null,
+                    null);
         }
 
         try {
@@ -49,6 +56,7 @@ public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
             throw new RuntimeException(String.format("failed to convert response to string: %s", e.getMessage()));
         }
 
-        return new HttpResponse(response, resp.getStatusLine().getStatusCode());
+
+        return response;
     }
 }

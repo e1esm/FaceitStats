@@ -72,7 +72,7 @@ public class StatisticsService {
 
         StatisticFaceitResponse[] response;
         try {
-            response = this.objectMapper.readValue(resp.content(), StatisticFaceitResponse[].class);
+            response = this.objectMapper.readValue(resp, StatisticFaceitResponse[].class);
         }catch (JsonProcessingException e){
             throw new RuntimeException("failed to map json to statistics response class: " + e.getMessage());
         }
