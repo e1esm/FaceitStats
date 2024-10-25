@@ -6,14 +6,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.methods.HttpGet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import java.net.URI;
-import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @Service
 public class StatisticsService {
@@ -69,11 +67,12 @@ public class StatisticsService {
                     Integer.toString(StatisticsService.PAGE_SIZE));
 
         HttpGet req = new HttpGet(url);
-        String content = this.httpClient.getJsonResponse(req);
-        StatisticFaceitResponse[] response;
 
+        var resp = this.httpClient.getHttpResponse(req);
+
+        StatisticFaceitResponse[] response;
         try {
-            response = this.objectMapper.readValue(content, StatisticFaceitResponse[].class);
+            response = this.objectMapper.readValue(resp.content(), StatisticFaceitResponse[].class);
         }catch (JsonProcessingException e){
             throw new RuntimeException("failed to map json to statistics response class: " + e.getMessage());
         }

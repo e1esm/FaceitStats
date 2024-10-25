@@ -6,6 +6,7 @@ import com.esm.faceitstats.service.FaceitService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
 @RestController
 @RequestMapping("/api")
@@ -27,6 +28,9 @@ public class UserController {
         catch(RuntimeException e) {
             if(e instanceof UserNotFoundException){
                 throw new UserNotFoundException(String.format("%s: %s", e.getMessage(), username));
+            }
+            if(e instanceof HttpClientErrorException){
+                throw e;
             }
 
             return ResponseEntity.internalServerError().build();
