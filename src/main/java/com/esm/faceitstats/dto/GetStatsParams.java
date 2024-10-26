@@ -10,8 +10,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class GetStatsParams {
+    boolean allMatchesRequired;
     boolean isHLTVRequired;
-    boolean isHistoryOfHLTVRequired;
     boolean isMapRatingRequired;
-
 }

@@ -3,6 +3,7 @@ package com.esm.faceitstats.utils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,34 +30,38 @@ public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
                 String.format(URL, param));
     }
 
-    public String getHttpResponse(HttpRequestBase req){
+    public String getHttpResponse(HttpRequestBase req) {
         req.addHeader(new BasicHeader("Authorization", String.format("Bearer %s", System.getenv("auth_token"))));
 
-        CloseableHttpResponse resp;
+        CloseableHttpResponse resp = null;
         String response;
         try {
             resp = this.client.execute(req);
-        }catch (IOException e){
-            throw new RuntimeException(String.format("failed to execute request: %s", e.getMessage()));
-        }
 
-
-        if(resp.getStatusLine().getStatusCode() != HttpStatus.OK.value()){
-            throw HttpClientErrorException.create(
-                    HttpStatusCode.valueOf(resp.getStatusLine().getStatusCode()),
-                    "",
-                    null,
-                    null,
-                    null);
-        }
-
-        try {
+            if(resp.getStatusLine().getStatusCode() != HttpStatus.OK.value()){
+                throw HttpClientErrorException.create(
+                        HttpStatusCode.valueOf(resp.getStatusLine().getStatusCode()),
+                        "",
+                        null,
+                        null,
+                        null);
+            }
+            
             response = InputStreamConverter.convertStreamToString(resp.getEntity().getContent());
         }catch (IOException e){
             throw new RuntimeException(String.format("failed to convert response to string: %s", e.getMessage()));
+        }finally {
+            this.tryCloseResponse(resp);
         }
 
-
         return response;
+    }
+
+    private void tryCloseResponse(CloseableHttpResponse resp) {
+        try{
+            resp.close();
+        }catch (IOException e){
+            throw new RuntimeException(String.format("failed to close response stream: %s", e.getMessage()));
+        }
     }
 }

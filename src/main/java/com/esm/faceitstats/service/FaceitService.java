@@ -1,10 +1,11 @@
 package com.esm.faceitstats.service;
 
-import com.esm.faceitstats.dto.UserFaceitResponse;
-import com.esm.faceitstats.dto.UserResponse;
+import com.esm.faceitstats.dto.*;
 import com.esm.faceitstats.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
 
 @Service
 public class FaceitService {
@@ -31,6 +32,10 @@ public class FaceitService {
         }
 
         return resp.getUserResponse()[0];
+    }
+
+    public ArrayList<Match> getStatsOfUserBy(String id, GetStatsParams params){
+        return this.statisticsService.getStatisticsOfUserID(id, params.isAllMatchesRequired());
     }
 
 }

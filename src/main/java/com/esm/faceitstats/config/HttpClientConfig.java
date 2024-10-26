@@ -1,20 +1,14 @@
 package com.esm.faceitstats.config;
 
-import org.apache.http.Header;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import java.util.List;
 
 @Configuration
 public class HttpClientConfig {
-    private static final Logger log = LoggerFactory.getLogger(HttpClientConfig.class);
     private final int CONNECTION_TIMEOUT = 500;
     private final boolean ARE_REDIRECTS_ENABLED = true;
 

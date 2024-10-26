@@ -16,7 +16,6 @@ public class UserFaceitResponse {
     private UserResponse[] userResponse;
 
     @JsonProperty("errors")
-    @JsonIgnore
     private FaceitResponseError[] errors;
 
 }
