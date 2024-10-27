@@ -8,12 +8,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.crypto.Mac;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Match{
+
+    @JsonProperty("Match Id")
+    private String matchId;
 
     @JsonProperty("stats")
     MatchStat matchStat;
@@ -63,5 +68,10 @@ public class Match{
         @JsonProperty("Map")
         private String map;
 
+        @JsonProperty("hltv_rating")
+        private Double hltvRating;
+
+        @JsonProperty("ADR")
+        private Double averageDamage;
     }
 }

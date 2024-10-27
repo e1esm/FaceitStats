@@ -1,10 +1,9 @@
 package com.esm.faceitstats.service;
 
 import com.esm.faceitstats.dto.*;
-import com.esm.faceitstats.exception.UserNotFoundException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 
 @Service
@@ -28,14 +27,24 @@ public class FaceitService {
     public UserResponse getIDByUsername(String username){
         var resp = this.userService.getUserByUsername(username);
         if(resp.getUserResponse().length == 0){
-            throw new UserNotFoundException("user was not found");
+            throw new EntityNotFoundException("user was not found");
         }
 
         return resp.getUserResponse()[0];
     }
 
     public ArrayList<Match> getStatsOfUserBy(String id, GetStatsParams params){
-        return this.statisticsService.getStatisticsOfUserID(id, params.isAllMatchesRequired());
+         var resp = this.statisticsService.getMatchesOfUserById(id, params.isAllMatchesRequired());
+         if(resp.isEmpty()){
+             throw new EntityNotFoundException("stats were not found");
+         }
+
+         ArrayList<Match> matchesWithRating = new ArrayList<>();
+         if(params.isHLTVRequired()){
+
+         }
+
+         return resp;
     }
 
 }

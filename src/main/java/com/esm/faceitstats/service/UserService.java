@@ -1,15 +1,11 @@
 package com.esm.faceitstats.service;
 import com.esm.faceitstats.dto.UserFaceitResponse;
-import com.esm.faceitstats.exception.ResourceNotFoundException;
 import com.esm.faceitstats.utils.IHttpRequestBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.methods.HttpGet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 
 @Service
 public class UserService {

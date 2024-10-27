@@ -12,5 +12,23 @@ import lombok.Setter;
 public class GetStatsParams {
     boolean allMatchesRequired;
     boolean isHLTVRequired;
-    boolean isMapRatingRequired;
+
+    public static class GetsStatsBuilder{
+        boolean allMatchesRequired;
+        boolean isHLTVRequired;
+
+        public GetsStatsBuilder withAllMatchesRequired(boolean allMatchesRequired){
+            this.allMatchesRequired = allMatchesRequired;
+            return this;
+        }
+
+        public GetsStatsBuilder withHLTVRequired(boolean isHLTVRequired){
+            this.isHLTVRequired = isHLTVRequired;
+            return this;
+        }
+
+        public GetStatsParams build(){
+            return new GetStatsParams(allMatchesRequired, isHLTVRequired);
+        }
+    }
 }
