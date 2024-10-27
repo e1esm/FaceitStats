@@ -34,15 +34,11 @@ public class FaceitService {
     }
 
     public ArrayList<Match> getStatsOfUserBy(String id, GetStatsParams params){
-         var resp = this.statisticsService.getMatchesOfUserById(id, params.isAllMatchesRequired());
+         var resp = this.statisticsService.getMatchesOfUserById(id, params.isAllMatchesRequired(), params.isHLTVRequired());
          if(resp.isEmpty()){
              throw new EntityNotFoundException("stats were not found");
          }
 
-         ArrayList<Match> matchesWithRating = new ArrayList<>();
-         if(params.isHLTVRequired()){
-
-         }
 
          return resp;
     }

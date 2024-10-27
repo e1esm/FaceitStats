@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.client.methods.HttpGet;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -25,14 +26,7 @@ public class UserService {
     }
 
     public UserFaceitResponse getUserByUsername(String nickname) {
-        HttpGet req;
-        try {
-            req = new HttpGet(this.httpClient.buildRequestURI(UserService.GET_ID_BY_NICKNAME_ENDPOINT, nickname));
-        }catch (IllegalArgumentException e){
-            throw new IllegalArgumentException(String.format("failed to create HTTP request: %s", e.getMessage()));
-        }
-
-        String response = this.httpClient.getHttpResponse(req);
+        String response = this.httpClient.getHttpResponse(this.httpClient.buildRequestURI(UserService.GET_ID_BY_NICKNAME_ENDPOINT, nickname).toString(), HttpMethod.GET.name());
         UserFaceitResponse resp;
 
         try {

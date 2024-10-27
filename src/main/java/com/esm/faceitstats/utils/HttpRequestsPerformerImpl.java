@@ -1,28 +1,23 @@
 package com.esm.faceitstats.utils;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicHeader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
-
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 @Component
 public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
-    CloseableHttpClient client;
+    HttpClient httpClient;
 
     @Autowired
-    public void setClient(CloseableHttpClient client){
-        this.client = client;
+    public void setHttpClient(HttpClient client){
+        this.httpClient = client;
     }
 
     public URI buildRequestURI(String URL, String... param){
@@ -30,38 +25,30 @@ public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
                 String.format(URL, param));
     }
 
-    public String getHttpResponse(HttpRequestBase req) {
-        req.addHeader(new BasicHeader("Authorization", String.format("Bearer %s", System.getenv("auth_token"))));
-
-        CloseableHttpResponse resp = null;
+    public String getHttpResponse(String URL, String methodName) {
         String response;
         try {
-            resp = this.client.execute(req);
+            HttpRequest request = HttpRequest.newBuilder().
+                    uri(URI.create(URL)).
+                    header("Authorization", String.format("Bearer %s", System.getenv("auth_token"))).
+                    method(methodName, HttpRequest.BodyPublishers.noBody()).
+                    build();
 
-            if(resp.getStatusLine().getStatusCode() != HttpStatus.OK.value()){
+            HttpResponse<String> resp = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if(resp.statusCode() != HttpStatus.OK.value()){
                 throw HttpClientErrorException.create(
-                        HttpStatusCode.valueOf(resp.getStatusLine().getStatusCode()),
+                        HttpStatusCode.valueOf(resp.statusCode()),
                         "",
                         null,
                         null,
                         null);
             }
-            
-            response = InputStreamConverter.convertStreamToString(resp.getEntity().getContent());
-        }catch (IOException e){
-            throw new RuntimeException(String.format("failed to convert response to string: %s", e.getMessage()));
-        }finally {
-            this.tryCloseResponse(resp);
+
+            response = resp.body();
+        }catch (IOException | InterruptedException | RuntimeException e){
+            throw new RuntimeException(String.format("failed to convert response to string: %s", e));
         }
 
         return response;
-    }
-
-    private void tryCloseResponse(CloseableHttpResponse resp) {
-        try{
-            resp.close();
-        }catch (IOException e){
-            throw new RuntimeException(String.format("failed to close response stream: %s", e.getMessage()));
-        }
     }
 }

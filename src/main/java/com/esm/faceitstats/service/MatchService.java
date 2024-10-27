@@ -1,6 +1,7 @@
 package com.esm.faceitstats.service;
 
 import com.esm.faceitstats.dto.Match;
+import com.esm.faceitstats.utils.AdditionalStatsCalculator;
 import com.esm.faceitstats.utils.IHttpRequestBuilder;
 import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
@@ -9,7 +10,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class MatchService {
@@ -23,18 +28,27 @@ public class MatchService {
     }
 
 
-    public void getADROfMatchForUser(Match match, String userID) {
-        setMatchADRFromJson(match, userID, performADRRequest(match));
+    @Async
+    public CompletableFuture<Void> getAdditionalStatsOfMatch(Match match, String userID, boolean isHLTVRequired) {
+        try {
+            setMatchADRFromJson(match, userID, performADRRequest(match));
+        }catch (JSONException e){
+            // approximate calculations of adr because it's still required for hltv rating
+            match.getMatchStat().setAverageDamage((double) (match.getMatchStat().getKills() * 100 / AdditionalStatsCalculator.getOverallRounds(match.getMatchStat())));
+        }finally {
+            if(isHLTVRequired){
+                match.getMatchStat().setHltvRating(AdditionalStatsCalculator.calculateHLTVRating(match.getMatchStat()));
+            }
+        }
+        return null;
     }
 
     private String performADRRequest(Match match) {
         String response;
         try{
-            HttpGet req = new HttpGet(String.format(ENRICH_MATCH_STATS, match.getMatchId()));
-            response = this.httpClient.getHttpResponse(req);
-
-        }catch (IllegalArgumentException | JSONException e){
-            throw new RuntimeException(String.format("%s: failed to get ADR of a match: %s", match.getMatchId(), e));
+            response = this.httpClient.getHttpResponse(this.httpClient.buildRequestURI(MatchService.ENRICH_MATCH_STATS, match.getMatchId()).toString(), HttpMethod.GET.name());
+        }catch ( RuntimeException e){
+            throw new RuntimeException(String.format("%s: failed to get ADR of a match: %s", match.getMatchId(), e.getMessage()));
         }
 
         return response;

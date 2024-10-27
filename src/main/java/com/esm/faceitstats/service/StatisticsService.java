@@ -9,11 +9,14 @@ import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.*;
+
 import org.json.*;
 
 @Service
@@ -43,7 +46,7 @@ public class StatisticsService {
         this.matchService = matchService;
     }
 
-    public ArrayList<Match> getMatchesOfUserById(String ID, boolean areAllMatchesRequired){
+    public ArrayList<Match> getMatchesOfUserById(String ID, boolean areAllMatchesRequired, boolean isHltvRequired){
         ArrayList<Match> responses = new ArrayList<>();
         boolean toBeProcessed = true;
         int offset = 0;
@@ -65,27 +68,31 @@ public class StatisticsService {
             throw new RuntimeException(String.format("failed to get statistics of user: %s: %s", ID, e.getMessage()));
         }
 
-        for (Match match : responses) {
-            try {
-                this.matchService.getADROfMatchForUser(match, ID);
-            }catch (RuntimeException e){
-                log.error(e.getMessage());
-                //ignore enrichment exceptions
-            }
-        }
+        this.getAdditionalStatsForMatches(responses, ID, isHltvRequired);
 
         return responses;
     }
 
+    private void getAdditionalStatsForMatches(ArrayList<Match> matches, String userID, boolean isHLTVRequired){
+        CompletableFuture<?>[] futures = new CompletableFuture[matches.size()];
+
+        for(int i = 0; i < matches.size(); i++){
+            CompletableFuture<Void> futureResponse = this.matchService.getAdditionalStatsOfMatch(matches.get(i), userID, isHLTVRequired);
+            futures[i] = (futureResponse);
+        }
+
+        CompletableFuture.allOf(futures).join();
+    }
+
     public List<Match> performRequest(String id, int from, int to){
         String pagingQueryParams = String.format("?offset=%d&limit=%d", from, to);
-        URI url = this.httpClient.buildRequestURI(
-                    StatisticsService.GET_STATS_OF_ID + pagingQueryParams,
-                    id,
-                    Integer.toString(StatisticsService.PAGE_SIZE));
 
-        HttpGet req = new HttpGet(url);
-        var resp = this.httpClient.getHttpResponse(req);
+        var resp = this.httpClient.getHttpResponse(
+                this.httpClient.buildRequestURI(
+                StatisticsService.GET_STATS_OF_ID + pagingQueryParams,
+                id,
+                Integer.toString(StatisticsService.PAGE_SIZE)).toString(),
+                HttpMethod.GET.name());
 
         StatisticFaceitResponse response;
         try {

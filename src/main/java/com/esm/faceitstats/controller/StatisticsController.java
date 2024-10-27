@@ -41,7 +41,7 @@ public class StatisticsController {
 
         ArrayList<Match> stats;
         try {
-            stats = (ArrayList<Match>) this.faceitService.getStatsOfUserBy(id, params);
+            stats = this.faceitService.getStatsOfUserBy(id, params);
         }catch (RuntimeException e) {
             if(e instanceof EntityNotFoundException) {
                 throw new ResourceNotFoundException(String.format("%s: %s", e.getMessage(), id));
@@ -56,5 +56,7 @@ public class StatisticsController {
         }
 
         return ResponseEntity.ok(stats);
+
+
     }
 }

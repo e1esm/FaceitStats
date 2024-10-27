@@ -1,6 +1,7 @@
 package com.esm.faceitstats.utils;
 
 
+import com.esm.faceitstats.dto.Match;
 
 public class AdditionalStatsCalculator {
     private static final double IMPACT_MAGIC_NUM = 0.41;
@@ -13,33 +14,32 @@ public class AdditionalStatsCalculator {
     private static final double IMPACT_KPR_RATE = 2.13;
     private static final double APR_RATE = 0.42;
 
-/*
-    public static MatchStatsEnriched calculateAdditionalStats(MatchStatsEnriched matchHLTVStat) {
-        Integer overallRounds = AdditionalStatsCalculator.getOverallRounds(matchHLTVStat);
-        double kpr = (double) matchHLTVStat.getMatchStat().getKills() / overallRounds * KPR_RATE;
-        double dpr = (double) matchHLTVStat.getMatchStat().getDeaths() / overallRounds * DPR_RATE;
-        double impact = getImpactOfMatch(matchHLTVStat, kpr, overallRounds);
 
-       return matchHLTVStat;
+    public static Double calculateHLTVRating(Match.MatchStat stats) {
+        Integer overallRounds = AdditionalStatsCalculator.getOverallRounds(stats);
+        double kpr = (double) stats.getKills() / overallRounds * KPR_RATE;
+        double dpr = (double) stats.getDeaths() / overallRounds * DPR_RATE;
+        double apr = (double) stats.getAssists() / overallRounds * APR_RATE;
+        double impact = IMPACT_KPR_RATE * (double) stats.getKills() / overallRounds * apr - IMPACT_MAGIC_NUM;
+        double kast = getKastOfMatch(stats, overallRounds);
 
+       return KAST_RATE * kast +
+               KPR_RATE * kpr -
+               DPR_RATE * dpr +
+               IMPACT_RATE * impact +
+               ADR_RATE * stats.getAverageDamage() +
+               RATING_MAGIN_NUM;
     }
 
-    private static double getImpactOfMatch(MatchHLTVStat matchHLTVStat, double kpr, Integer overallRounds) {
-        return IMPACT_KPR_RATE * kpr * matchHLTVStat.getMatchStat().getAssists() / (double) overallRounds - IMPACT_MAGIC_NUM;
-    }
-
-    private static double getCastOfMatch(MatchHLTVStat matchHLTVStat, Integer overallRounds) {
-        Integer totalRoundsKillHappened = 0;
-        Integer totalRoundsAlive = overallRounds - matchHLTVStat.getMatchStat().getDeaths();
-        return 0;
+    private static double getKastOfMatch(Match.MatchStat stats, Integer overallRounds) {
+        return (double) (stats.getKills() + stats.getAssists() + stats.getDeaths()) / overallRounds * 100;
     }
 
 
-    private static Integer getOverallRounds(MatchHLTVStat matchHLTVStat) {
-        String score = matchHLTVStat.getMatchStat().getScore();
+    public static Integer getOverallRounds(Match.MatchStat stat) {
+        String score = stat.getScore();
         String[] roundsPerTeams = score.split("/");
         return Integer.parseInt(roundsPerTeams[0].trim()) + Integer.parseInt(roundsPerTeams[1].trim());
     }
 
- */
 }
