@@ -1,17 +1,17 @@
 package com.esm.faceitstats.service;
 
+import com.esm.faceitstats.dto.UserAverageStats;
 import com.esm.faceitstats.dto.Match;
 import com.esm.faceitstats.dto.StatisticFaceitResponse;
 import com.esm.faceitstats.utils.IHttpRequestBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.client.methods.HttpGet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
-import java.net.URI;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -73,6 +73,31 @@ public class StatisticsService {
         return responses;
     }
 
+    public UserAverageStats getAverageStatsBasedOnMatches(List<Match> matches){
+        UserAverageStats userAverageStats = new UserAverageStats();
+        for(Match match : matches){
+            log.info(match.getMatchId());
+            userAverageStats.setAdr(userAverageStats.getAdr() + match.getUserStat().getAverageDamage());
+            userAverageStats.setKd(userAverageStats.getKd() + match.getUserStat().getKd());
+            userAverageStats.setKr(userAverageStats.getKr() + match.getUserStat().getKr());
+            userAverageStats.setAces(userAverageStats.getAces() + match.getUserStat().getAces());
+            userAverageStats.setAssists(userAverageStats.getAssists() + match.getUserStat().getAssists());
+            userAverageStats.setDeaths(userAverageStats.getDeaths() + match.getUserStat().getDeaths());
+            userAverageStats.setKills(userAverageStats.getKills() + match.getUserStat().getKills());
+            userAverageStats.setMvps(userAverageStats.getMvps() + match.getUserStat().getMvps());
+            userAverageStats.setQuadroKills(userAverageStats.getQuadroKills() + match.getUserStat().getQuads());
+            userAverageStats.setTrippleKills(userAverageStats.getTrippleKills() + match.getUserStat().getTriples());
+            userAverageStats.setDoubleKills(userAverageStats.getDoubleKills() + match.getUserStat().getDoubleKills());
+            userAverageStats.setHltvRating(userAverageStats.getHltvRating() + match.getUserStat().getHltvRating());
+            userAverageStats.setHeadshotPercentage(userAverageStats.getHeadshotPercentage() + match.getUserStat().getHeadshotPercentage());
+        }
+
+        userAverageStats.setAverageOf(matches.size());
+
+        return userAverageStats;
+    }
+
+
     private void getAdditionalStatsForMatches(ArrayList<Match> matches, String userID, boolean isHLTVRequired){
         CompletableFuture<?>[] futures = new CompletableFuture[matches.size()];
 
@@ -101,8 +126,10 @@ public class StatisticsService {
             throw new RuntimeException("failed to map json to statistics response class: " + e.getMessage());
         }
 
+
         List<Match> stats = new ArrayList<>();
         Collections.addAll(stats, response.getMatches());
+
         mapMatchToID(stats, resp);
 
         return stats;

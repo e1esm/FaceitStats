@@ -3,12 +3,9 @@ package com.esm.faceitstats.service;
 import com.esm.faceitstats.dto.Match;
 import com.esm.faceitstats.utils.AdditionalStatsCalculator;
 import com.esm.faceitstats.utils.IHttpRequestBuilder;
-import org.apache.http.client.methods.HttpGet;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Async;
@@ -34,10 +31,10 @@ public class MatchService {
             setMatchADRFromJson(match, userID, performADRRequest(match));
         }catch (JSONException e){
             // approximate calculations of adr because it's still required for hltv rating
-            match.getMatchStat().setAverageDamage((double) (match.getMatchStat().getKills() * 100 / AdditionalStatsCalculator.getOverallRounds(match.getMatchStat())));
+            match.getUserStat().setAverageDamage((double) (match.getUserStat().getKills() * 100 / AdditionalStatsCalculator.getOverallRounds(match.getUserStat())));
         }finally {
             if(isHLTVRequired){
-                match.getMatchStat().setHltvRating(AdditionalStatsCalculator.calculateHLTVRating(match.getMatchStat()));
+                match.getUserStat().setHltvRating(AdditionalStatsCalculator.calculateHLTVRating(match.getUserStat()));
             }
         }
         return null;
@@ -67,7 +64,7 @@ public class MatchService {
 
                 if(players.getJSONObject(j).getString("player_id").equalsIgnoreCase(userID)){
                     JSONObject stats = players.getJSONObject(j).getJSONObject("player_stats");
-                    match.getMatchStat().setAverageDamage((stats.getDouble("ADR")));
+                    match.getUserStat().setAverageDamage((stats.getDouble("ADR")));
                 }
             }
         }

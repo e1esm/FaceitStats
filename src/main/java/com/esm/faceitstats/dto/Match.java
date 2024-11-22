@@ -8,8 +8,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.crypto.Mac;
-
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,57 +19,6 @@ public class Match{
     private String matchId;
 
     @JsonProperty("stats")
-    MatchStat matchStat;
+    UserStat userStat;
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class MatchStat {
-        @JsonProperty("K/D Ratio")
-        private Double kd;
-
-        @JsonProperty("Penta Kills")
-        private Integer aces;
-
-        @JsonProperty("K/R Ratio")
-        private Double kr;
-
-        @JsonProperty("Quadro Kills")
-        private Integer quads;
-
-        @JsonProperty("Triple Kills")
-        private Integer triples;
-
-        @JsonProperty("Double Kills")
-        private Integer doubleKills;
-
-        @JsonProperty("MVPs")
-        private Integer mvps;
-
-        @JsonProperty("Score")
-        private String score;
-
-        @JsonProperty("Deaths")
-        private Integer deaths;
-
-        @JsonProperty("Kills")
-        private Integer kills;
-
-        @JsonProperty("Assists")
-        private Integer assists;
-
-        @JsonProperty("Headshots %")
-        private Integer headshotPercentage;
-
-        @JsonProperty("Map")
-        private String map;
-
-        @JsonProperty("hltv_rating")
-        private Double hltvRating;
-
-        @JsonProperty("ADR")
-        private Double averageDamage;
-    }
 }

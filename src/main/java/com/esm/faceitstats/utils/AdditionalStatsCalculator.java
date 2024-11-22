@@ -1,7 +1,6 @@
 package com.esm.faceitstats.utils;
 
-
-import com.esm.faceitstats.dto.Match;
+import com.esm.faceitstats.dto.UserStat;
 
 public class AdditionalStatsCalculator {
     private static final double IMPACT_MAGIC_NUM = 0.41;
@@ -15,7 +14,7 @@ public class AdditionalStatsCalculator {
     private static final double APR_RATE = 0.42;
 
 
-    public static Double calculateHLTVRating(Match.MatchStat stats) {
+    public static Double calculateHLTVRating(UserStat stats) {
         Integer overallRounds = AdditionalStatsCalculator.getOverallRounds(stats);
         double kpr = (double) stats.getKills() / overallRounds * KPR_RATE;
         double dpr = (double) stats.getDeaths() / overallRounds * DPR_RATE;
@@ -31,12 +30,12 @@ public class AdditionalStatsCalculator {
                RATING_MAGIN_NUM;
     }
 
-    private static double getKastOfMatch(Match.MatchStat stats, Integer overallRounds) {
+    private static double getKastOfMatch(UserStat stats, Integer overallRounds) {
         return (double) (stats.getKills() + stats.getAssists() + stats.getDeaths()) / overallRounds * 100;
     }
 
 
-    public static Integer getOverallRounds(Match.MatchStat stat) {
+    public static Integer getOverallRounds(UserStat stat) {
         String score = stat.getScore();
         String[] roundsPerTeams = score.split("/");
         return Integer.parseInt(roundsPerTeams[0].trim()) + Integer.parseInt(roundsPerTeams[1].trim());
