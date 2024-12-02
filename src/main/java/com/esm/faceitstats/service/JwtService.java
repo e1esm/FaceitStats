@@ -1,5 +1,6 @@
 package com.esm.faceitstats.service;
 
+import com.esm.faceitstats.dto.JwtResponse;
 import com.esm.faceitstats.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -25,7 +26,7 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public JwtResponse generateToken(UserDetails userDetails) {
         Map<String, Object> claims = new HashMap<>();
         if (userDetails instanceof User customUserDetails) {
             claims.put("id", customUserDetails.getId());
@@ -45,11 +46,14 @@ public class JwtService {
         return claimsResolvers.apply(claims);
     }
 
-    private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
-        return Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
+    private JwtResponse generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+        var expiresAt = new Date(System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000);
+        var token = Jwts.builder().setClaims(extraClaims).setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 100000 * 60 * 24))
+                .setExpiration(expiresAt)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256).compact();
+
+        return new JwtResponse(expiresAt.getTime(), token);
     }
 
 

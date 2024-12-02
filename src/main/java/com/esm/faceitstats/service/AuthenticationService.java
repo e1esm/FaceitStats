@@ -33,8 +33,7 @@ public class AuthenticationService {
 
         userService.create(user);
 
-        var jwt = jwtService.generateToken(user);
-        return new JwtResponse(jwt);
+        return jwtService.generateToken(user);
     }
 
     public JwtResponse signIn(SignInRequest request) {
@@ -47,7 +46,6 @@ public class AuthenticationService {
                 .userDetailsService()
                 .loadUserByUsername(request.getUsername());
 
-        var jwt = jwtService.generateToken(user);
-        return new JwtResponse(jwt);
+        return jwtService.generateToken(user);
     }
 }
