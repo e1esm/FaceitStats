@@ -43,7 +43,6 @@ public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
                         null,
                         null);
             }
-
             response = resp.body();
         }catch (IOException | InterruptedException | RuntimeException e){
             throw new RuntimeException(String.format("failed to convert response to string: %s", e));

@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 public class FaceitService {
 
     StatisticsService statisticsService;
-    UserService userService;
+    FaceitUserService faceitUserService;
 
     @Autowired
     public void setStatisticsService(StatisticsService statisticsService) {
@@ -21,13 +21,13 @@ public class FaceitService {
     }
 
     @Autowired
-    public void setUsernameResolverService(UserService userResolverService) {
-        this.userService = userResolverService;
+    public void setUsernameResolverService(FaceitUserService userResolverService) {
+        this.faceitUserService = userResolverService;
     }
 
 
     public UserResponse getIDByUsername(String username) {
-        var resp = this.userService.getUserByUsername(username);
+        var resp = this.faceitUserService.getUserByUsername(username);
         if (resp.getUserResponse().length == 0) {
             throw new EntityNotFoundException("user was not found");
         }

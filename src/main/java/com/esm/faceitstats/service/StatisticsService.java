@@ -76,7 +76,6 @@ public class StatisticsService {
     public UserAverageStats getAverageStatsBasedOnMatches(List<Match> matches){
         UserAverageStats userAverageStats = new UserAverageStats();
         for(Match match : matches){
-            log.info(match.getMatchId());
             userAverageStats.setAdr(userAverageStats.getAdr() + match.getUserStat().getAverageDamage());
             userAverageStats.setKd(userAverageStats.getKd() + match.getUserStat().getKd());
             userAverageStats.setKr(userAverageStats.getKr() + match.getUserStat().getKr());
