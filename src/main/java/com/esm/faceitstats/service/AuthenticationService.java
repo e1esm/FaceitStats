@@ -48,4 +48,8 @@ public class AuthenticationService {
 
         return jwtService.generateToken(user);
     }
+
+    public User getCurrentUser() {
+        return userService.getCurrentUser();
+    }
 }

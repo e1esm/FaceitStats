@@ -141,6 +141,7 @@ public class StatisticsService {
             JSONObject obj = arr.getJSONObject(i).getJSONObject("stats");
 
             matches.get(i).setMatchId(obj.getString("Match Id"));
+            matches.get(i).setWin(obj.getInt("Result") == 1);
         }
     }
 

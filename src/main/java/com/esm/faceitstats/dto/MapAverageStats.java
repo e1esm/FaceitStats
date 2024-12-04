@@ -1,5 +1,6 @@
 package com.esm.faceitstats.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +18,8 @@ public class MapAverageStats extends UserAverageStats{
     @JsonProperty("times_played")
     private int amount;
 
+    @JsonIgnore
+    private int wins;
 
     public MapAverageStats(
             String map,
@@ -32,9 +35,11 @@ public class MapAverageStats extends UserAverageStats{
             int assists,
             int headshotPercentage,
             double hltvRating,
-            double averageDamage
+            double averageDamage,
+            int wins
             ) {
         super(kd, kr, quads, triples, doubleKills, mvps, deaths, kills, assists, headshotPercentage, hltvRating, averageDamage, aces);
         this.map = map;
+        this.wins = wins;
     }
 }

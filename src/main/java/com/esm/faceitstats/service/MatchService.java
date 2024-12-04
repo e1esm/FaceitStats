@@ -24,7 +24,6 @@ public class MatchService {
         this.httpClient = httpClient;
     }
 
-
     @Async
     public CompletableFuture<Void> getAdditionalStatsOfMatch(Match match, String userID, boolean isHLTVRequired) {
         try {

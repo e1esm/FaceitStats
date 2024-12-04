@@ -68,7 +68,7 @@ public class FaceitService {
                 sorted(Map.Entry.comparingByValue(Comparator.reverseOrder())).forEach((entry) ->{
                 matches.forEach((match) ->{
                         if(match.getUserStat().getMap() != null && match.getUserStat().getMap().equalsIgnoreCase(entry.getKey())){
-                            mapAverageStats.merge(entry.getKey(), AverageCalculationsHelper.averageMapStatsFromUserStats(entry.getKey(), match.getUserStat()), AverageCalculationsHelper::add);
+                            mapAverageStats.merge(entry.getKey(), AverageCalculationsHelper.averageMapStatsFromUserStats(entry.getKey(), match.getUserStat(), match.isWin()), AverageCalculationsHelper::add);
                         }
                         });
         });

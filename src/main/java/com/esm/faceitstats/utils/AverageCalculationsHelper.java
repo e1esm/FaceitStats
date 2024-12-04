@@ -14,6 +14,7 @@ public class AverageCalculationsHelper {
             throw new IllegalArgumentException("Maps do not match");
         }
 
+        matchStats.setWins(a.getWins() + b.getWins());
         matchStats.setMap(b.getMap());
         matchStats.setKd(a.getKd() + b.getKd());
         matchStats.setAces(a.getAces() + b.getAces());
@@ -32,8 +33,9 @@ public class AverageCalculationsHelper {
         return matchStats;
     }
 
-    public static MapAverageStats averageMapStatsFromUserStats(String map, UserStat userStat){
+    public static MapAverageStats averageMapStatsFromUserStats(String map, UserStat userStat, boolean isWin){
         return new MapAverageStats(
+
                 map,
                 userStat.getKd(),
                 userStat.getAces(),
@@ -47,8 +49,8 @@ public class AverageCalculationsHelper {
                 userStat.getAssists(),
                 userStat.getHeadshotPercentage(),
                 userStat.getHltvRating(),
-                userStat.getAverageDamage()
-
+                userStat.getAverageDamage(),
+                isWin ? 1 : 0
         );
     }
 }

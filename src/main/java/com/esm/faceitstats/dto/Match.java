@@ -18,6 +18,9 @@ public class Match{
     @JsonProperty("Match Id")
     private String matchId;
 
+    @JsonProperty("was_won")
+    private boolean win;
+
     @JsonProperty("stats")
     UserStat userStat;
 
