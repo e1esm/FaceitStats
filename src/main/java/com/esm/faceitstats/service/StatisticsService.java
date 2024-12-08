@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
+import java.net.http.HttpRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -116,7 +117,7 @@ public class StatisticsService {
                 StatisticsService.GET_STATS_OF_ID + pagingQueryParams,
                 id,
                 Integer.toString(StatisticsService.PAGE_SIZE)).toString(),
-                HttpMethod.GET.name());
+                HttpMethod.GET.name(), HttpRequest.BodyPublishers.noBody());
 
         StatisticFaceitResponse response;
         try {

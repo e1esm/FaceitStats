@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.net.http.HttpRequest;
 import java.util.concurrent.CompletableFuture;
 
 @Service
@@ -42,7 +43,7 @@ public class MatchService {
     private String performADRRequest(Match match) {
         String response;
         try{
-            response = this.httpClient.getHttpResponse(this.httpClient.buildRequestURI(MatchService.ENRICH_MATCH_STATS, match.getMatchId()).toString(), HttpMethod.GET.name());
+            response = this.httpClient.getHttpResponse(this.httpClient.buildRequestURI(MatchService.ENRICH_MATCH_STATS, match.getMatchId()).toString(), HttpMethod.GET.name(), HttpRequest.BodyPublishers.noBody());
         }catch ( RuntimeException e){
             throw new RuntimeException(String.format("%s: failed to get ADR of a match: %s", match.getMatchId(), e.getMessage()));
         }

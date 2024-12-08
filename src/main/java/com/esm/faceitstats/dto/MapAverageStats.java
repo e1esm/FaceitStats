@@ -18,7 +18,7 @@ public class MapAverageStats extends UserAverageStats{
     @JsonProperty("times_played")
     private int amount;
 
-    @JsonIgnore
+    @JsonProperty("wins")
     private int wins;
 
     public MapAverageStats(
@@ -41,5 +41,6 @@ public class MapAverageStats extends UserAverageStats{
         super(kd, kr, quads, triples, doubleKills, mvps, deaths, kills, assists, headshotPercentage, hltvRating, averageDamage, aces);
         this.map = map;
         this.wins = wins;
+        this.amount = getAmount();
     }
 }

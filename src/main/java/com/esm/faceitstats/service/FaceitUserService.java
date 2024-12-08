@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
+import java.net.http.HttpRequest;
+
 @Service
 public class FaceitUserService {
     private static final String GET_ID_BY_NICKNAME_ENDPOINT = "https://open.faceit.com/data/v4/search/players?nickname=%s";
@@ -25,7 +27,7 @@ public class FaceitUserService {
     }
 
     public UserFaceitResponse getUserByUsername(String nickname) {
-        String response = this.httpClient.getHttpResponse(this.httpClient.buildRequestURI(FaceitUserService.GET_ID_BY_NICKNAME_ENDPOINT, nickname).toString(), HttpMethod.GET.name());
+        String response = this.httpClient.getHttpResponse(this.httpClient.buildRequestURI(FaceitUserService.GET_ID_BY_NICKNAME_ENDPOINT, nickname).toString(), HttpMethod.GET.name(), HttpRequest.BodyPublishers.noBody());
         UserFaceitResponse resp;
 
         try {

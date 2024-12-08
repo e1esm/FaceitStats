@@ -10,6 +10,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Map;
 
 @Component
 public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
@@ -25,13 +26,16 @@ public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
                 String.format(URL, param));
     }
 
-    public String getHttpResponse(String URL, String methodName) {
+    public String getHttpResponse(String URL, String methodName, HttpRequest.BodyPublisher body) {
         String response;
         try {
             HttpRequest request = HttpRequest.newBuilder().
                     uri(URI.create(URL)).
+                    header("Content-Type", "application/json").
+                    header("x-rapidapi-key", System.getenv("api_key")).
+                    header("x-rapidapi-host", "chatgpt-openai1.p.rapidapi.com").
                     header("Authorization", String.format("Bearer %s", System.getenv("auth_token"))).
-                    method(methodName, HttpRequest.BodyPublishers.noBody()).
+                    method(methodName, body).
                     build();
 
             HttpResponse<String> resp = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString());
