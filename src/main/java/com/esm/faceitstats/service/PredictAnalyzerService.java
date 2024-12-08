@@ -21,6 +21,7 @@ import java.net.http.HttpRequest;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 public class PredictAnalyzerService {
@@ -38,6 +39,10 @@ public class PredictAnalyzerService {
     @Autowired
     public void setHttpClient(IHttpRequestBuilder httpClient) {
         this.httpClient = httpClient;
+    }
+
+    public List<PredictedMatch> getPredictedMatch(Long userID) {
+        return this.predictedMatchRepository.findMatchesByUserId(userID);
     }
 
 
