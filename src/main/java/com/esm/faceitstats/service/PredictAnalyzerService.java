@@ -41,8 +41,12 @@ public class PredictAnalyzerService {
         this.httpClient = httpClient;
     }
 
-    public List<PredictedMatch> getPredictedMatch(Long userID) {
+    public List<PredictedMatch> getPredictedMatchesOfUser(Long userID) {
         return this.predictedMatchRepository.findMatchesByUserId(userID);
+    }
+
+    public List<PredictedMatch> getPredictedMatches() {
+        return this.predictedMatchRepository.findAll();
     }
 
 

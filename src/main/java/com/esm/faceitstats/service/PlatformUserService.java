@@ -2,12 +2,15 @@ package com.esm.faceitstats.service;
 
 import com.esm.faceitstats.entity.Role;
 import com.esm.faceitstats.entity.User;
+import com.esm.faceitstats.exception.ResourceNotFoundException;
 import com.esm.faceitstats.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,25 @@ public class PlatformUserService {
         return repository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User was not found"));
 
+    }
+
+    public void updateUser(Long id, User user) {
+        if(!this.repository.existsById(id)){
+            throw new ResourceNotFoundException("User was not found");
+        }
+
+        this.repository.save(user);
+    }
+
+    public List<User> getUsers(){
+        return this.repository.findAll();
+    }
+
+    public void delete(Long id) {
+        if(!repository.existsById(id)) {
+            throw new ResourceNotFoundException("User was not found");
+        }
+        repository.deleteById(id);
     }
 
     public UserDetailsService userDetailsService() {
