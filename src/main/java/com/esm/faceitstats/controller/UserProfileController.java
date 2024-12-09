@@ -1,6 +1,5 @@
 package com.esm.faceitstats.controller;
 
-import com.esm.faceitstats.dto.LobbyResponse;
 import com.esm.faceitstats.dto.UserUpdateRequest;
 import com.esm.faceitstats.entity.Role;
 import com.esm.faceitstats.entity.User;
@@ -9,8 +8,6 @@ import com.esm.faceitstats.service.PredictAnalyzerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -44,8 +41,14 @@ public class UserProfileController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<?> getUsers() {
-        var uesr = this.platformUserService.getUsers();
+    public ResponseEntity<?> getUsers(@RequestParam(required = false) String name) {
+        var uesr = this.platformUserService.getUsers(name);
+        return ResponseEntity.ok(uesr);
+    }
+
+    @GetMapping("/users/{id}")
+    public ResponseEntity<?> getUser(@PathVariable Long id) {
+        var uesr = this.platformUserService.getUser(id);
         return ResponseEntity.ok(uesr);
     }
 

@@ -1,6 +1,5 @@
 package com.esm.faceitstats.service;
 
-import com.esm.faceitstats.entity.Role;
 import com.esm.faceitstats.entity.User;
 import com.esm.faceitstats.exception.ResourceNotFoundException;
 import com.esm.faceitstats.repository.UserRepository;
@@ -10,7 +9,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +41,19 @@ public class PlatformUserService {
         this.repository.save(user);
     }
 
-    public List<User> getUsers(){
+    public User getUser(Long id) {
+         var user = this.repository.findById(id);
+            if(user.isEmpty()) {
+                throw new ResourceNotFoundException("User was not found");
+            }
+
+            return user.get();
+    }
+
+    public List<User> getUsers(String query){
+        if(query != null){
+            return this.repository.findByUsernameContaining(query);
+        }
         return this.repository.findAll();
     }
 
@@ -61,11 +71,5 @@ public class PlatformUserService {
     public User getCurrentUser() {
         var username = SecurityContextHolder.getContext().getAuthentication().getName();
         return getByUsername(username);
-    }
-
-    public void setAdmin() {
-        var user = getCurrentUser();
-        user.setRole(Role.ROLE_ADMIN);
-        save(user);
     }
 }

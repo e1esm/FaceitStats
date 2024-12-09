@@ -22,6 +22,10 @@ public class ClientHttpCodesMapper {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exception.getResponseBodyAsString());
         }
 
+        if(exception instanceof HttpClientErrorException.TooManyRequests) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(exception.getResponseBodyAsString());
+        }
+
         log.error(exception.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }

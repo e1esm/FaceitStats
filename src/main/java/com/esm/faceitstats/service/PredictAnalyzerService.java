@@ -1,12 +1,11 @@
 package com.esm.faceitstats.service;
 
-
-import com.esm.faceitstats.dto.Faction;
-import com.esm.faceitstats.dto.LobbyResponse;
-import com.esm.faceitstats.dto.PredictionResponse;
+import com.esm.faceitstats.dto.*;
 import com.esm.faceitstats.entity.PredictedMatch;
 import com.esm.faceitstats.entity.User;
 import com.esm.faceitstats.repository.PredictedMatchRepository;
+import com.esm.faceitstats.utils.AnalysisComparator;
+import com.esm.faceitstats.utils.AnalysisMapComparator;
 import com.esm.faceitstats.utils.IHttpRequestBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +20,10 @@ import java.net.http.HttpRequest;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PredictAnalyzerService {
@@ -30,6 +32,12 @@ public class PredictAnalyzerService {
     private static final String MATCH_LOBBY = "https://open.faceit.com/data/v4/matches/%s";
     private IHttpRequestBuilder httpClient;
     private PredictedMatchRepository predictedMatchRepository;
+    private AnalysisReportExporterService analysisReportExporterService;
+
+    @Autowired
+    public void setAnalysisReportExporterService(AnalysisReportExporterService analysisReportExporterService) {
+        this.analysisReportExporterService = analysisReportExporterService;
+    }
 
     @Autowired
     public void setPredictedMatchRepository(PredictedMatchRepository predictedMatchRepository) {
@@ -47,6 +55,20 @@ public class PredictAnalyzerService {
 
     public List<PredictedMatch> getPredictedMatches() {
         return this.predictedMatchRepository.findAll();
+    }
+
+    public void doMonthlyAnalyzes(){
+        var startDate = Instant.now().minus(Duration.ofDays(30));
+        var endDate = Instant.now();
+
+        var allPredictions = this.predictedMatchRepository.findPredictedMatchesByCreatedAtBetween(startDate, endDate);
+
+
+       var userReliability = this.getPlayersReliability(allPredictions);
+       var mapsReliability = this.getMapsReliability(allPredictions);
+
+
+       this.analysisReportExporterService.save(startDate.toString(), endDate.toString(), mapsReliability, userReliability);
     }
 
 
@@ -114,6 +136,72 @@ public class PredictAnalyzerService {
         return false;
     }
 
+    private AnalysisMapCategories getMapsReliability(List<PredictedMatch> predictedMatches) {
+        Map<String, AnalysisMap> mapsReliability = new HashMap<>();
+
+        for(PredictedMatch predictedMatch: predictedMatches){
+            mapsReliability.merge(predictedMatch.getPlayedMap(), AnalysisMap
+                    .builder()
+                            .map(predictedMatch.getPlayedMap())
+                            .overallPlayed(1L)
+                            .overallPredictionFailed((long) (predictedMatch.isWasPredictionRight() ? 0 : 1))
+                    .build(), PredictAnalyzerService::combineMapStats);
+        }
+
+        List<AnalysisMap> mapReliability = new ArrayList<>();
+        mapsReliability.entrySet().stream().sorted(Map.Entry.comparingByValue(new AnalysisMapComparator())).forEach(user ->
+                mapReliability.add(user.getValue())
+        );
+
+        return AnalysisMapCategories.builder()
+                .mostReliableMaps(mapReliability.subList(mapReliability.size() / 3, mapReliability.size()))
+                .leastReliableMaps(mapReliability.subList(0, mapReliability.size() / 3))
+                .build();
+    }
+
+    private AnalysisUserCategories getPlayersReliability(List<PredictedMatch> predictedMatches){
+        Map<String, AnalysisUser> userStatsAccordingToPredictions = new HashMap<>();
+
+        for(PredictedMatch predictedMatch: predictedMatches){
+            String link = predictedMatch.getMatchLink();
+            var lobby = this.performRequest(link.substring(link.lastIndexOf("/") + 1));
+
+            if(!lobby.getStatus().equalsIgnoreCase("FINISHED")){
+                continue;
+            }
+
+            var firstTeam = lobby.getTeams().getFirstFaction();
+            enrichCurrAnalysisResults(firstTeam, lobby, userStatsAccordingToPredictions);
+            var secondTeam = lobby.getTeams().getSecondFaction();
+            enrichCurrAnalysisResults(secondTeam, lobby, userStatsAccordingToPredictions);
+
+        }
+
+        List<AnalysisUser> playerReliability = new ArrayList<>();
+        userStatsAccordingToPredictions.entrySet().stream().sorted(Map.Entry.comparingByValue(new AnalysisComparator())).forEach(user ->
+                playerReliability.add(user.getValue())
+        );
+
+        return AnalysisUserCategories
+                .builder()
+                .leastReliablePlayers(playerReliability.subList(0, playerReliability.size()/ 3))
+                .mostReliablePlayers(playerReliability.subList(playerReliability.size() - (playerReliability.size() / 3), playerReliability.size()))
+                .build();
+    }
+
+    private void enrichCurrAnalysisResults(LobbyResponse.Faction team, LobbyResponse lobby, Map<String, AnalysisUser> userStatsAccordingToPredictions){
+        for(LobbyResponse.User user: team.getUsers()){
+            boolean didPredictionWork = lobby.getResult().getWinner().equalsIgnoreCase(Faction.FIRST_FACTION.getFaction());
+                userStatsAccordingToPredictions.merge(user.getId(), AnalysisUser
+                        .builder()
+                        .id(user.getId())
+                        .username(user.getNickname())
+                        .overallMatchesPlayed(1L)
+                        .overallPredictionsFailed((long) (didPredictionWork ? 0: 1))
+                        .build(), PredictAnalyzerService::combineStats);
+        }
+    }
+
     private LobbyResponse performRequest(String id){
 
         var resp = this.httpClient.getHttpResponse(
@@ -130,5 +218,36 @@ public class PredictAnalyzerService {
         }
 
         return response;
+    }
+
+
+    private static AnalysisUser combineStats(AnalysisUser first, AnalysisUser second){
+        if(first == null){
+            return second;
+        }else if(second == null){
+            return first;
+        }else {
+            return AnalysisUser.builder()
+                    .id(first.getId())
+                    .username(first.getUsername())
+                    .overallMatchesPlayed(first.getOverallMatchesPlayed() + second.getOverallPredictionsFailed())
+                    .overallPredictionsFailed(first.getOverallPredictionsFailed() + second.getOverallMatchesPlayed())
+                    .build();
+        }
+    }
+
+    private static AnalysisMap combineMapStats(AnalysisMap first, AnalysisMap second){
+        if(first == null){
+            return second;
+        }else if(second == null){
+            return first;
+        }else{
+            return AnalysisMap
+                    .builder()
+                    .overallPredictionFailed(first.getOverallPredictionFailed() + second.getOverallPredictionFailed())
+                    .overallPlayed(first.getOverallPlayed() + second.getOverallPlayed())
+                    .map(first.getMap())
+                    .build();
+        }
     }
 }
