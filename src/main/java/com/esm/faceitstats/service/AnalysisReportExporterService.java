@@ -160,7 +160,7 @@ public class AnalysisReportExporterService {
             rows.append("<tr>");
             rows.append("<td>").append(user.getUsername()).append("</td>");
             rows.append("<td>").append(user.getId()).append("</td>");
-            rows.append("<td>").append(user.getOverallPredictionsFailed() / user.getOverallMatchesPlayed()).append("</td>");
+            rows.append("<td>").append((double) user.getOverallPredictionsFailed() / user.getOverallMatchesPlayed()).append("</td>");
             rows.append("</tr>");
         }
         return rows.toString();
@@ -171,7 +171,7 @@ public class AnalysisReportExporterService {
         for (AnalysisMap map : maps) {
             rows.append("<tr>");
             rows.append("<td>").append(map.getMap()).append("</td>");
-            rows.append("<td>").append(map.getOverallPredictionFailed() / map.getOverallPlayed()).append("</td>");
+            rows.append("<td>").append( (double) map.getOverallPredictionFailed() / map.getOverallPlayed()).append("</td>");
             rows.append("</tr>");
         }
         return rows.toString();
