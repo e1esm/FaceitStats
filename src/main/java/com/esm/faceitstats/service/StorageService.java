@@ -6,13 +6,13 @@ import com.esm.faceitstats.repository.FileRepository;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,9 +45,18 @@ public class StorageService {
                             .stream(content, -1, 10485760)
                             .build()
             );
+
+            this.saveS3Path(String.format("%s/%s", BUCKET_NAME, name));
         }catch (Exception e){
             log.error(e.getMessage());
         }
+    }
+
+    public void saveS3Path(String path){
+        this.fileRepository.save(File.builder()
+                .fileName(path)
+                .createdAt(Instant.now())
+                .build());
     }
 
     public List<String> getAllPaths(){
@@ -83,6 +92,22 @@ public class StorageService {
         }
 
         return null;
+    }
+
+    public void deleteFile(String path){
+        try {
+            this.minioClient.removeObject(
+                    RemoveObjectArgs
+                            .builder()
+                            .bucket(BUCKET_NAME)
+                            .object(path)
+                            .build()
+            );
+
+            this.fileRepository.deleteByPath(path);
+        }catch (Exception e){
+            log.error(e.getMessage());
+        }
     }
 
 }
