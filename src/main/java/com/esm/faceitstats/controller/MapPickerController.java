@@ -21,4 +21,6 @@ public class MapPickerController {
         var lobby = this.lobbyService.getLobby(matchLink);
         return ResponseEntity.ok(lobby);
     }
+
+
 }

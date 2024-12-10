@@ -1,10 +1,10 @@
 package com.esm.faceitstats.controller;
 
-import com.esm.faceitstats.dto.JwtResponse;
-import com.esm.faceitstats.dto.SignInRequest;
-import com.esm.faceitstats.dto.SignUpRequest;
+import com.esm.faceitstats.dto.*;
+import com.esm.faceitstats.entity.User;
 import com.esm.faceitstats.service.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,5 +21,16 @@ public class AuthController {
     @PostMapping("/signin")
     public JwtResponse signIn(@RequestBody SignInRequest request) {
         return authenticationService.signIn(request);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> me() {
+        var user = this.authenticationService.getCurrentUser();
+        return ResponseEntity.ok(CurrentUserResponse.builder()
+                        .id(user.getId())
+                        .role(user.getRole().toString())
+                        .faceitLink(user.getFaceitLink())
+                        .username(user.getUsername())
+                .build());
     }
 }

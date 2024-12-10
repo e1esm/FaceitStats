@@ -38,7 +38,12 @@ public class PlatformUserService {
             throw new ResourceNotFoundException("User was not found");
         }
 
-        this.repository.save(user);
+         var tempUser = this.repository.findById(id).get();
+         tempUser.setUsername(user.getUsername());
+         tempUser.setRole(user.getRole());
+         tempUser.setFaceitLink(user.getFaceitLink());
+
+        this.repository.save(tempUser);
     }
 
     public User getUser(Long id) {
