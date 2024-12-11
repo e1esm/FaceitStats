@@ -4,6 +4,7 @@ import com.esm.faceitstats.dto.CurrentUserResponse;
 import com.esm.faceitstats.dto.UserUpdateRequest;
 import com.esm.faceitstats.entity.Role;
 import com.esm.faceitstats.entity.User;
+import com.esm.faceitstats.service.AuthenticationService;
 import com.esm.faceitstats.service.PlatformUserService;
 import com.esm.faceitstats.service.PredictAnalyzerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,12 @@ public class UserProfileController {
 
     private PredictAnalyzerService predictAnalyzerService;
     private PlatformUserService platformUserService;
+    private AuthenticationService authenticationService;
+
+    @Autowired
+    public void setAuthenticationService(AuthenticationService authenticationService) {
+        this.authenticationService = authenticationService;
+    }
 
     @Autowired
     public void setPlatformUserService(PlatformUserService platformUserService) {
@@ -81,15 +88,25 @@ public class UserProfileController {
 
     @PutMapping("/users/{id}")
     public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody() UserUpdateRequest updateRequest) {
-        System.out.println(updateRequest.getUsername());
-        System.out.println(updateRequest.getFaceitLink());
-        System.out.println(updateRequest.getRole());
-        this.platformUserService.updateUser(id, User
+
+        var currUser = this.authenticationService.getCurrentUser();
+        var user = User
                 .builder()
+                .id(id)
                 .username(updateRequest.getUsername())
                 .faceitLink(updateRequest.getFaceitLink())
                 .role(Role.valueOf(updateRequest.getRole()))
-                .build());
-        return ResponseEntity.ok().build();
+                .password(currUser.getPassword())
+                .build();
+
+        if(updateRequest.getCurrentPassword() != null && updateRequest.getNewPassword() != null && !updateRequest.getCurrentPassword().isEmpty() && !updateRequest.getNewPassword().isEmpty()){
+            if(!this.authenticationService.doPasswordsMatch(updateRequest.getCurrentPassword(), currUser.getPassword())){
+                throw new IllegalArgumentException("Current password does not match");
+            }
+            user.setPassword(this.authenticationService.encodePassword(updateRequest.getNewPassword()));
+        }
+
+        this.platformUserService.updateUser(id, user);
+        return ResponseEntity.ok().body(user);
     }
 }

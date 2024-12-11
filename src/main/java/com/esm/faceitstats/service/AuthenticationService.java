@@ -22,7 +22,6 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public JwtResponse signUp(SignUpRequest request) {
-
         var user = User.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -47,6 +46,15 @@ public class AuthenticationService {
                 .loadUserByUsername(request.getUsername());
 
         return jwtService.generateToken(user);
+    }
+
+
+    public boolean doPasswordsMatch(String oldPassword, String newPassword) {
+        return passwordEncoder.matches(oldPassword, newPassword);
+    }
+
+    public String encodePassword(String password) {
+        return passwordEncoder.encode(password);
     }
 
     public User getCurrentUser() {

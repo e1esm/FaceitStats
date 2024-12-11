@@ -19,6 +19,12 @@ public class UserUpdateRequest {
     @JsonProperty("faceit_link")
     private String faceitLink;
 
+    @JsonProperty("old_password")
+    private String currentPassword;
+
+    @JsonProperty("new_password")
+    private String newPassword;
+
     private String role;
 
     @JsonProperty("faceit_link")

@@ -42,6 +42,7 @@ public class PlatformUserService {
          tempUser.setUsername(user.getUsername());
          tempUser.setRole(user.getRole());
          tempUser.setFaceitLink(user.getFaceitLink());
+         tempUser.setPassword(user.getPassword());
 
         this.repository.save(tempUser);
     }
