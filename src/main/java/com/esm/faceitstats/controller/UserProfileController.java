@@ -1,7 +1,6 @@
 package com.esm.faceitstats.controller;
 
 import com.esm.faceitstats.dto.CurrentUserResponse;
-import com.esm.faceitstats.dto.UserResponse;
 import com.esm.faceitstats.dto.UserUpdateRequest;
 import com.esm.faceitstats.entity.Role;
 import com.esm.faceitstats.entity.User;

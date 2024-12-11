@@ -79,15 +79,16 @@ public class StorageService {
     }
 
     public InputStream getFile(String path){
-        try(InputStream inputStream = this.minioClient.getObject(
-                GetObjectArgs
-                        .builder()
-                        .bucket(BUCKET_NAME)
-                        .object(path)
-                        .build()
-        )){
+        try {
+            InputStream inputStream = this.minioClient.getObject(
+                    GetObjectArgs
+                            .builder()
+                            .bucket(BUCKET_NAME)
+                            .object(path)
+                            .build()
+            );
             return inputStream;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(e.getMessage());
         }
 

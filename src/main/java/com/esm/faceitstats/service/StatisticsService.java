@@ -111,16 +111,22 @@ public class StatisticsService {
 
     public List<Match> performRequest(String id, int from, int to){
         String pagingQueryParams = String.format("?offset=%d&limit=%d", from, to);
-
-        var resp = this.httpClient.getHttpResponse(
-                this.httpClient.buildRequestURI(
-                StatisticsService.GET_STATS_OF_ID + pagingQueryParams,
-                id,
-                Integer.toString(StatisticsService.PAGE_SIZE)).toString(),
-                HttpMethod.GET.name(), HttpRequest.BodyPublishers.noBody());
+        String resp = null;
+        try {
+            resp = this.httpClient.getHttpResponse(
+                    this.httpClient.buildRequestURI(
+                            StatisticsService.GET_STATS_OF_ID + pagingQueryParams,
+                            id,
+                            Integer.toString(StatisticsService.PAGE_SIZE)).toString(),
+                    HttpMethod.GET.name(), HttpRequest.BodyPublishers.noBody());
+        }catch (RuntimeException e){
+            log.error(e.getMessage());
+            return new ArrayList<>();
+        }
 
         StatisticFaceitResponse response;
         try {
+
             response = this.objectMapper.readValue(resp, StatisticFaceitResponse.class);
         }catch (JsonProcessingException e){
             throw new RuntimeException("failed to map json to statistics response class: " + e.getMessage());

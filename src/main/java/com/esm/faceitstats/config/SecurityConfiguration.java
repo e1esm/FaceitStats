@@ -46,8 +46,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/auth/me").authenticated()
-                        .requestMatchers("/api/users/**", "/api/stats/**", "/api/maps/**", "/api/profile/matches").hasRole("USER")
+                        .requestMatchers("/api/users/**", "/api/stats/**", "/api/maps/**", "/api/profile/matches").authenticated()
                         .requestMatchers( "api/profile/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/files/**").hasRole("ADMIN")
                         .anyRequest().permitAll())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
