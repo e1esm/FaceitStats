@@ -2,6 +2,8 @@ package com.esm.faceitstats.controller;
 
 import com.esm.faceitstats.dto.UserResponse;
 import com.esm.faceitstats.service.FaceitService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

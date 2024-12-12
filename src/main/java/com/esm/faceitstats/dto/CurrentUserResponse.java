@@ -1,13 +1,13 @@
 package com.esm.faceitstats.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Builder
 @Getter
 @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public class CurrentUserResponse {
 
     @JsonProperty("id")
@@ -17,8 +17,8 @@ public class CurrentUserResponse {
     private String username;
 
     @JsonProperty("role")
-    String role;
+    private String role;
 
     @JsonProperty("faceit_link")
-    String faceitLink;
+    private String faceitLink;
 }

@@ -2,6 +2,7 @@ package com.esm.faceitstats.component;
 
 import com.esm.faceitstats.service.JwtService;
 import com.esm.faceitstats.service.PlatformUserService;
+import com.esm.faceitstats.service.TokenCacheService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
 
     private final PlatformUserService userService;
+    private final TokenCacheService tokenCacheService;
 
     @Override
     protected void doFilterInternal(
@@ -42,6 +44,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         var jwt = authHeader.substring(BEARER_PREFIX.length());
+        if(tokenCacheService.isTokenBlacklisted(jwt)){
+            filterChain.doFilter(request, response);
+            return;
+        }
         var username = jwtService.extractUserName(jwt);
 
         if (StringUtils.hasLength(username) && SecurityContextHolder.getContext().getAuthentication() == null) {
