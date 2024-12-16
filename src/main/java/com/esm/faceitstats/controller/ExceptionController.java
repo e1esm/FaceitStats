@@ -55,6 +55,5 @@ public class ExceptionController {
 
         return jsonObject.toString();
     }
-
 }
 

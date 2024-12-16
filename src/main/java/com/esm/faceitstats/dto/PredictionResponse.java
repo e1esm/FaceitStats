@@ -7,18 +7,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PredictionResponse {
 
     @JsonProperty("first_faction_best_maps")
-    MapExpectation[] firstFactionBestMaps;
+    public List<MapExpectation> firstFactionBestMaps;
 
     @JsonProperty("second_faction_best_maps")
-    MapExpectation[] secondFactionBestMaps;
+    public List<MapExpectation> secondFactionBestMaps;
+
+    public PredictionResponse() {
+        this.firstFactionBestMaps = new ArrayList<>();
+        this.secondFactionBestMaps = new ArrayList<>();
+    }
 
     @Setter
     @Getter

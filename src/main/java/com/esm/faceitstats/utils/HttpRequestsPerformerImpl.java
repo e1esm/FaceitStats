@@ -32,8 +32,8 @@ public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
             HttpRequest request = HttpRequest.newBuilder().
                     uri(URI.create(URL)).
                     header("Content-Type", "application/json").
-                    header("x-rapidapi-key", System.getenv("api_key")).
-                    header("x-rapidapi-host", "chatgpt-openai1.p.rapidapi.com").
+                    header("x-rapidapi-key", "d1a666fb89mshc026fcf47eaa65fp17c8b1jsn8794d3a097e7").
+                    header("x-rapidapi-host", "free-chatgpt-api.p.rapidapi.com").
                     header("Authorization", String.format("Bearer %s", System.getenv("auth_token"))).
                     method(methodName, body).
                     build();
@@ -49,6 +49,13 @@ public class HttpRequestsPerformerImpl implements IHttpRequestBuilder {
             }
             response = resp.body();
         }catch (IOException | InterruptedException | RuntimeException e){
+            if(e.getMessage().contains("502")){
+                throw HttpClientErrorException.create(
+                        HttpStatusCode.valueOf(502),
+                        "Bad Gateway",
+                        null, null, null
+                );
+            }
             throw new RuntimeException(String.format("failed to convert response to string: %s", e));
         }
 

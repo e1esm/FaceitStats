@@ -9,6 +9,8 @@ import com.esm.faceitstats.utils.AnalysisMapComparator;
 import com.esm.faceitstats.utils.IHttpRequestBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +22,11 @@ import java.net.http.HttpRequest;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
+@AllArgsConstructor
+@NoArgsConstructor
 public class PredictAnalyzerService {
     private static final Logger log = LoggerFactory.getLogger(PredictAnalyzerService.class);
 
@@ -50,11 +51,15 @@ public class PredictAnalyzerService {
     }
 
     public List<PredictedMatch> getPredictedMatchesOfUser(Long userID) {
-        return this.predictedMatchRepository.findMatchesByUserId(userID);
+        var tasks =  this.predictedMatchRepository.findMatchesByUserId(userID);
+        tasks.sort(Comparator.comparing(PredictedMatch::getCreatedAt, Comparator.reverseOrder()));
+        return tasks;
     }
 
     public List<PredictedMatch> getPredictedMatches() {
-        return this.predictedMatchRepository.findAll();
+        var tasks =  this.predictedMatchRepository.findAll();
+        tasks.sort(Comparator.comparing(PredictedMatch::getCreatedAt, Comparator.reverseOrder()));
+        return tasks;
     }
 
     public void doMonthlyAnalyzes(){
@@ -97,7 +102,7 @@ public class PredictAnalyzerService {
                     break;
                 }
 
-                Long minutesToWait = 30L;
+                Long minutesToWait = 5L;
                 Thread.sleep(Duration.of(minutesToWait, ChronoUnit.MINUTES).toMillis());
             }
         }catch (InterruptedException e){
@@ -211,7 +216,6 @@ public class PredictAnalyzerService {
         LobbyResponse response;
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-
             response = objectMapper.readValue(resp, LobbyResponse.class);
         }catch (JsonProcessingException e) {
             throw new RuntimeException("failed to map json to statistics response class: " + e.getMessage());

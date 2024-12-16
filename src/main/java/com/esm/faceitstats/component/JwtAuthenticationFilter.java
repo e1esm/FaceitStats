@@ -7,7 +7,11 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
@@ -22,13 +26,19 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
+@AllArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String HEADER_NAME = "Authorization";
-    private final JwtService jwtService;
 
-    private final PlatformUserService userService;
-    private final TokenCacheService tokenCacheService;
+    @Autowired
+    private JwtService jwtService;
+
+    @Autowired
+    private PlatformUserService userService;
+
+    @Autowired
+    private TokenCacheService tokenCacheService;
 
     @Override
     protected void doFilterInternal(

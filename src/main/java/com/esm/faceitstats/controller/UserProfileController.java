@@ -2,22 +2,29 @@ package com.esm.faceitstats.controller;
 
 import com.esm.faceitstats.dto.CurrentUserResponse;
 import com.esm.faceitstats.dto.UserUpdateRequest;
+import com.esm.faceitstats.entity.PredictedMatch;
 import com.esm.faceitstats.entity.Role;
 import com.esm.faceitstats.entity.User;
 import com.esm.faceitstats.service.AuthenticationService;
 import com.esm.faceitstats.service.PlatformUserService;
 import com.esm.faceitstats.service.PredictAnalyzerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 @RestController
 @RequestMapping("/api/profile")
 public class UserProfileController {
 
 
+    private static final Logger log = LoggerFactory.getLogger(UserProfileController.class);
     private PredictAnalyzerService predictAnalyzerService;
     private PlatformUserService platformUserService;
     private AuthenticationService authenticationService;
@@ -40,7 +47,6 @@ public class UserProfileController {
     @GetMapping("/matches/{id}")
     public ResponseEntity<?> getMatchHistory(@PathVariable Long id) {
         var tasks = this.predictAnalyzerService.getPredictedMatchesOfUser(id);
-
         return ResponseEntity.ok(tasks);
     }
 
